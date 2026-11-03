@@ -1,1 +1,1703 @@
+html  
+<!doctype html>    
+<html lang="de">    
+<head>    
+  <meta charset="utf-8">    
+  <meta name="viewport" content="width=device-width,initial-scale=1">    
+  <title>Instandhaltung – Schichtplaner</title>    
+    
+  <style>    
+    :root {    
+      --blue: #0284c7;    
+      --orange: #ea580c;    
+      --purple: #6d28d9;    
+      --green: #15803d;    
+      --red: #b91c1c;    
+      --dark-red: #7f1d1d;    
+      --gray: #64748b;    
+      --border: #cbd5e1;    
+      --bg: #f1f5f9;    
+    }    
+    
+    * { box-sizing: border-box; }    
+    
+    body {    
+      margin: 0;    
+      font-family: Arial, Helvetica, sans-serif;    
+      background: var(--bg);    
+      color: #0f172a;    
+    }    
+    
+    header {    
+      background: #172554;    
+      color: white;    
+      padding: 14px 20px;    
+      display: flex;    
+      justify-content: space-between;    
+      align-items: center;    
+      gap: 12px;    
+    }    
+    
+    header h1 {    
+      margin: 0;    
+      font-size: 21px;    
+    }    
+    
+    header small {    
+      color: #cbd5e1;    
+    }    
+    
+    button, input, select {    
+      font: inherit;    
+      padding: 8px 10px;    
+      border-radius: 5px;    
+      border: 1px solid var(--border);    
+    }    
+    
+    button {    
+      background: white;    
+      cursor: pointer;    
+    }    
+    
+    button.primary {    
+      background: #1d4ed8;    
+      color: white;    
+      border-color: #1d4ed8;    
+    }    
+    
+    button.danger {    
+      background: var(--red);    
+      border-color: var(--red);    
+      color: white;    
+    }    
+    
+    button.secondary {    
+      background: #475569;    
+      border-color: #475569;    
+      color: white;    
+    }    
+    
+    nav {    
+      background: white;    
+      border-bottom: 1px solid var(--border);    
+      display: flex;    
+      gap: 8px;    
+      padding: 10px 15px;    
+      flex-wrap: wrap;    
+    }    
+    
+    nav button.active {    
+      background: #1d4ed8;    
+      border-color: #1d4ed8;    
+      color: white;    
+    }    
+    
+    main {    
+      padding: 16px;    
+    }    
+    
+    .panel {    
+      background: white;    
+      border: 1px solid var(--border);    
+      border-radius: 8px;    
+      padding: 15px;    
+      margin-bottom: 15px;    
+      overflow: auto;    
+    }    
+    
+    .card {    
+      border: 1px solid var(--border);    
+      border-radius: 7px;    
+      padding: 12px;    
+      margin-bottom: 10px;    
+    }    
+    
+    .toolbar, .form-grid {    
+      display: flex;    
+      flex-wrap: wrap;    
+      gap: 10px;    
+      align-items: end;    
+    }    
+    
+    .toolbar label, .form-grid label {    
+      display: flex;    
+      flex-direction: column;    
+      gap: 4px;    
+      font-size: 13px;    
+      font-weight: bold;    
+    }    
+    
+    .notice {    
+      padding: 10px;    
+      background: #eff6ff;    
+      border-left: 4px solid #1d4ed8;    
+      margin: 8px 0;    
+    }    
+    
+    .warning {    
+      background: #fff7ed;    
+      border-left-color: #d97706;    
+    }    
+    
+    .hidden {    
+      display: none !important;    
+    }    
+    
+    .small {    
+      font-size: 12px;    
+      color: #475569;    
+    }    
+    
+    .badge {    
+      display: inline-block;    
+      padding: 3px 7px;    
+      border-radius: 20px;    
+      margin: 2px;    
+      background: #e2e8f0;    
+      font-size: 11px;    
+    }    
+    
+    .row {    
+      display: flex;    
+      justify-content: space-between;    
+      align-items: center;    
+      gap: 10px;    
+      border-bottom: 1px solid #e2e8f0;    
+      padding: 8px 0;    
+    }    
+    
+    table {    
+      width: 100%;    
+      min-width: 1150px;    
+      border-collapse: collapse;    
+    }    
+    
+    th, td {    
+      border: 1px solid var(--border);    
+      padding: 4px;    
+      font-size: 12px;    
+      text-align: center;    
+      vertical-align: middle;    
+    }    
+    
+    th {    
+      position: sticky;    
+      top: 0;    
+      z-index: 3;    
+      background: #e2e8f0;    
+    }    
+    
+    th:first-child,    
+    td:first-child {    
+      position: sticky;    
+      left: 0;    
+      z-index: 2;    
+      min-width: 190px;    
+      text-align: left;    
+      font-weight: bold;    
+      background: white;    
+    }    
+    
+    th:first-child {    
+      z-index: 4;    
+      background: #e2e8f0;    
+    }    
+    
+    .weekend {    
+      background: #f8fafc !important;    
+    }    
+    
+    .holiday {    
+      background: #fee2e2 !important;    
+      color: #991b1b;    
+    }    
+    
+    .vacation-day {    
+      background: #fff1f2 !important;    
+    }    
+    
+    .shift {    
+      display: block;    
+      padding: 5px 2px;    
+      border-radius: 4px;    
+      font-weight: bold;    
+      color: white;    
+      margin-top: 3px;    
+    }    
+    
+    .F { background: var(--blue); }    
+    .S { background: var(--orange); }    
+    .N { background: var(--purple); }    
+    .R { background: var(--green); }    
+    .U { background: var(--red); }    
+    .A { background: #991b1b; }    
+    .SCH { background: var(--dark-red); }    
+    
+    /* CSS für die kompakte Jahresansicht */    
+    .mini-calendar {    
+      width: 100%;    
+      min-width: 0;    
+      border-collapse: collapse;    
+      table-layout: fixed;    
+    }    
+    .mini-calendar th {    
+      position: static;    
+      background: #f8fafc;    
+      font-weight: bold;    
+      padding: 4px 0;    
+      color: #475569;    
+      font-size: 11px;    
+    }    
+    .mini-calendar td {    
+      border: 1px solid var(--border);    
+      text-align: center;    
+      height: 38px;    
+      vertical-align: top;    
+      padding: 2px;    
+    }    
+    .mini-calendar td.empty {    
+      border: none;    
+      background: transparent;    
+    }    
+    .day-number {    
+      font-size: 9px;    
+      color: #64748b;    
+      text-align: right;    
+      margin-bottom: 2px;    
+    }    
+  
+    /* NEU: CSS für Kommentare */  
+    .comment-btn {  
+      cursor: pointer;  
+      font-size: 14px;  
+      margin-top: 4px;  
+      display: inline-block;  
+      opacity: 0.3;  
+      text-decoration: none;  
+      transition: opacity 0.2s;  
+    }  
+  
+    .comment-btn:hover {  
+      opacity: 1;  
+    }  
+  
+    .comment-btn.has-comment {  
+      opacity: 1;  
+      position: relative;  
+    }  
+  
+    .comment-btn.has-comment::after {  
+      content: '';  
+      position: absolute;  
+      top: 0px;  
+      right: -2px;  
+      width: 6px;  
+      height: 6px;  
+      background: var(--red);  
+      border-radius: 50%;  
+    }  
+    
+    #login {    
+      min-height: 100vh;    
+      display: grid;    
+      place-items: center;    
+      background: linear-gradient(135deg, #172554, #1d4ed8);    
+    }    
+    
+    #loginBox {    
+      width: min(400px, 92vw);    
+      background: white;    
+      padding: 28px;    
+      border-radius: 10px;    
+      box-shadow: 0 15px 45px rgba(0,0,0,.25);    
+    }    
+    
+    #loginBox input {    
+      width: 100%;    
+      margin: 5px 0 12px;    
+    }    
+    
+    #loginBox button {    
+      width: 100%;    
+    }    
+    
+    @media print {    
+      header, nav, .toolbar, button, #login {    
+        display: none !important;    
+      }    
+    
+      main {    
+        padding: 0;    
+      }    
+    
+      .panel {    
+        border: none;    
+      }    
+    }    
+  </style>    
+</head>    
+    
+<body>    
+    
+<section id="login">    
+  <div id="loginBox">    
+    <h2>Instandhaltung – Schichtplaner</h2>    
+    
+    <label>Benutzername</label>    
+    <input id="loginUser" value="admin">    
+    
+    <label>Passwort</label>    
+    <input id="loginPassword" type="password" value="admin123">    
+    
+    <button class="primary" onclick="login()">Anmelden</button>    
+    
+    <p id="loginError" style="color:#b91c1c"></p>    
+    
+    <hr>    
+    
+    <p class="small">    
+      Demo-Zugänge:<br>    
+      admin / admin123<br>    
+      planer / planer123<br>    
+      leser / leser123    
+    </p>    
+  </div>    
+</section>    
+    
+<section id="app" class="hidden">    
+    
+  <header>    
+    <div>    
+      <h1>Instandhaltung – Schichtplaner</h1>    
+      <small>Schlosser · Elektriker · Gebäude</small>    
+    </div>    
+    
+    <div>    
+      <span id="userInfo"></span>    
+      <button onclick="logout()">Abmelden</button>    
+    </div>    
+  </header>    
+    
+  <nav>    
+    <button class="tab active" onclick="showPage('plan', this)">Dienstplan</button>    
+    <button class="tab plannerOnly" onclick="showPage('jahr', this)">Jahresübersicht</button>    
+    <button class="tab" onclick="showPage('nacht', this)">Nachtwochen</button>    
+    <button class="tab" onclick="showPage('bereit', this)">Bereitschaft</button>    
+    <button class="tab" onclick="showPage('urlaub', this)">Urlaub</button>    
+    <button class="tab" onclick="showPage('mitarbeiter', this)">Mitarbeiter</button>    
+    <button class="tab adminOnly" onclick="showPage('benutzer', this)">Benutzer</button>    
+  </nav>    
+    
+  <main>    
+    
+    <section id="page-plan" class="page">    
+      <div class="panel">    
+    
+        <div class="toolbar">    
+          <label>Monat    
+            <input type="month" id="monthInput">    
+          </label>    
+    
+          <label>Bereich    
+            <select id="areaFilter">    
+              <option value="">Alle Bereiche</option>    
+              <option value="Schlosser">Schlosser</option>    
+              <option value="Elektriker">Elektriker</option>    
+              <option value="Gebäude">Gebäude</option>    
+            </select>    
+          </label>    
+    
+          <button class="primary" onclick="renderPlan()">Anzeigen</button>    
+          <button onclick="window.print()">Drucken / PDF</button>    
+          <button id="btnExportCSV" onclick="exportCSV()">CSV Export</button>    
+        </div>    
+    
+        <div class="notice">    
+          <strong>Farblegende:</strong>    
+          <span class="badge F" style="color:white">F Früh</span>    
+          <span class="badge S" style="color:white">S Spät</span>    
+          <span class="badge N" style="color:white">N Nacht</span>    
+          <span class="badge R" style="color:white">R Bereitschaft</span>    
+          <span class="badge U" style="color:white">U Urlaub</span>    
+          <span class="badge A" style="color:white">A Abwesend</span>    
+          <span class="badge SCH" style="color:white">Sch Schulung</span>    
+        </div>    
+    
+        <div id="calendarInfo"></div>    
+        <div id="plan"></div>    
+      </div>    
+    </section>    
+    
+    <section id="page-jahr" class="page hidden">    
+      <div class="panel">    
+        <h2>Kompakte Jahresübersicht</h2>    
+    
+        <div class="toolbar">    
+          <label>Jahr    
+            <input type="number" id="yearInput" min="2020" max="2100">    
+          </label>    
+          <label>Mitarbeiter    
+            <select id="yearEmployee"></select>    
+          </label>    
+          <button class="primary" onclick="renderYear()">Anzeigen</button>    
+        </div>    
+    
+        <div id="yearContent" style="margin-top: 20px;"></div>    
+      </div>    
+    </section>    
+    
+    <section id="page-nacht" class="page hidden">    
+      <div class="panel">    
+        <h2>Nachtwochen</h2>    
+    
+        <div class="notice">    
+          Pro Nachtwoche wird ein Schlosser und ein Elektriker eingeplant.<br>    
+          Nachtwoche: Sonntag 22:00 Uhr bis Samstag 06:00 Uhr.<br>    
+          Gebäude hat keine Nachtschicht.    
+        </div>    
+    
+        <div class="toolbar">    
+          <label>Datum innerhalb der Woche    
+            <input type="date" id="nightDate">    
+          </label>    
+    
+          <button class="primary" onclick="renderNight()">Woche anzeigen</button>    
+        </div>    
+    
+        <div id="nightContent"></div>    
+      </div>    
+    </section>    
+    
+    <section id="page-bereit" class="page hidden">    
+      <div class="panel">    
+        <h2>Wochenend-Bereitschaft</h2>    
+    
+        <div class="notice">    
+          Bereitschaft ist ausschließlich für Schlosser und Elektriker möglich.    
+          Gebäude wird nicht berücksichtigt.    
+        </div>    
+    
+        <div class="toolbar">    
+          <label>Datum innerhalb des Wochenendes    
+            <input type="date" id="readyDate">    
+          </label>    
+    
+          <button class="primary" onclick="renderReadiness()">Wochenende anzeigen</button>    
+        </div>    
+    
+        <div id="readyContent"></div>    
+      </div>    
+    </section>    
+    
+    <section id="page-urlaub" class="page hidden">    
+      <div class="panel">    
+        <h2>Urlaubsplanung</h2>    
+    
+        <div id="vacationForm" class="card">    
+          <h3>Jahresurlaub / Urlaub eintragen</h3>    
+    
+          <div class="form-grid">    
+            <label>Mitarbeiter    
+              <select id="vacEmployee"></select>    
+            </label>    
+    
+            <label>Von    
+              <input type="date" id="vacFrom">    
+            </label>    
+    
+            <label>Bis einschließlich    
+              <input type="date" id="vacTo">    
+            </label>    
+    
+            <label>Bemerkung    
+              <input id="vacNote" placeholder="z. B. Sommerurlaub">    
+            </label>    
+    
+            <button class="primary" onclick="addVacation()">Urlaub speichern</button>    
+          </div>    
+    
+          <p class="small">    
+            Urlaub wird automatisch im Dienstplan an Werktagen als „U“ angezeigt.    
+            Für Nacht und Bereitschaft werden Urlaub sowie der Tag vor und nach Urlaub gesperrt.    
+          </p>    
+        </div>    
+    
+        <div class="toolbar">    
+          <label>Jahr    
+            <input type="number" id="vacationYear" min="2020" max="2100">    
+          </label>    
+    
+          <button class="primary" onclick="renderVacations()">Urlaub anzeigen</button>    
+        </div>    
+    
+        <div id="vacationList"></div>    
+      </div>    
+    </section>    
+    
+    <section id="page-mitarbeiter" class="page hidden">    
+      <div class="panel">    
+        <h2>Mitarbeiterverwaltung</h2>    
+    
+        <div id="employeeForm" class="card">    
+          <h3>Mitarbeiter hinzufügen</h3>    
+    
+          <div class="form-grid">    
+            <label>Personalnummer    
+              <input id="empNo">    
+            </label>    
+    
+            <label>Vorname    
+              <input id="empFirst">    
+            </label>    
+    
+            <label>Nachname    
+              <input id="empLast">    
+            </label>    
+    
+            <label>Bereich    
+              <select id="empArea" onchange="toggleTeamSelection()">    
+                <option value="Schlosser">Schlosser</option>    
+                <option value="Elektriker">Elektriker</option>    
+                <option value="Gebäude">Gebäude</option>    
+              </select>    
+            </label>    
+    
+            <label id="teamLabel">Team    
+              <select id="empTeam">    
+                <option value="Team 1">Team 1</option>    
+                <option value="Team 2">Team 2</option>    
+              </select>    
+            </label>    
+    
+            <label id="nightEligibleLabel">Kann Nachtschicht arbeiten?    
+              <select id="empNightEligible">    
+                <option value="true">Ja</option>    
+                <option value="false">Nein</option>    
+              </select>    
+            </label>    
+    
+            <button class="primary" onclick="addEmployee()">Hinzufügen</button>    
+          </div>    
+        </div>    
+    
+        <div id="employeeList"></div>    
+      </div>    
+    </section>    
+    
+    <section id="page-benutzer" class="page hidden">    
+      <div class="panel">    
+        <h2>Benutzerverwaltung</h2>    
+    
+        <div class="card">    
+          <div class="form-grid">    
+            <label>Benutzername    
+              <input id="newUsername">    
+            </label>    
+    
+            <label>Passwort    
+              <input id="newPassword" type="password">    
+            </label>    
+    
+            <label>Rolle    
+              <select id="newRole">    
+                <option value="LESER">Leser</option>    
+                <option value="PLANER">Planer</option>    
+                <option value="ADMIN">Administrator</option>    
+              </select>    
+            </label>    
+    
+            <button class="primary" onclick="addUser()">Benutzer anlegen</button>    
+          </div>    
+        </div>    
+    
+        <div id="userList"></div>    
+      </div>    
+    </section>    
+    
+  </main>    
+</section>    
+    
+<script>    
+  const ROTATION_START = "2026-09-28";    
+    
+  let currentUser = null;    
+    
+  function load(key, fallback) {    
+    try {    
+      return JSON.parse(localStorage.getItem(key)) ?? fallback;    
+    } catch {    
+      return fallback;    
+    }    
+  }    
+    
+  function save(key, value) {    
+    localStorage.setItem(key, JSON.stringify(value));    
+  }    
+    
+  function iso(date) {    
+    const d = new Date(date);    
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());    
+    return d.toISOString().slice(0, 10);    
+  }    
+    
+  function parseDate(value) {    
+    return new Date(value + "T12:00:00");    
+  }    
+    
+  function addDays(date, amount) {    
+    const d = new Date(date);    
+    d.setDate(d.getDate() + amount);    
+    return d;    
+  }    
+    
+  function mondayOf(date) {    
+    const d = new Date(date);    
+    d.setHours(12, 0, 0, 0);    
+    
+    const weekday = d.getDay();    
+    const difference = weekday === 0 ? -6 : 1 - weekday;    
+    
+    d.setDate(d.getDate() + difference);    
+    return d;    
+  }    
+    
+  function sundayOf(date) {    
+    return addDays(mondayOf(date), -1);    
+  }    
+    
+  function isWeekend(date) {    
+    return date.getDay() === 0 || date.getDay() === 6;    
+  }    
+    
+  function canWrite() {    
+    return currentUser &&    
+      ["PLANER", "ADMIN"].includes(currentUser.role);    
+  }    
+    
+  function isAdmin() {    
+    return currentUser?.role === "ADMIN";    
+  }    
+    
+  function roleName(role) {    
+    return {    
+      ADMIN: "Administrator",    
+      PLANER: "Planer",    
+      LESER: "Leser"    
+    }[role];    
+  }    
+    
+  function getEmployees() {    
+    return load("employees", []).filter(employee => employee.active);    
+  }    
+    
+  function initData() {    
+    if (!localStorage.getItem("users")) {    
+      save("users", [    
+        { id: crypto.randomUUID(), username: "admin", password: "admin123", role: "ADMIN" },    
+        { id: crypto.randomUUID(), username: "planer", password: "planer123", role: "PLANER" },    
+        { id: crypto.randomUUID(), username: "leser", password: "leser123", role: "LESER" }    
+      ]);    
+    }    
+    
+    if (!localStorage.getItem("employees")) {    
+      save("employees", [    
+        { id: crypto.randomUUID(), no: "1001", first: "Max", last: "Müller1", area: "Schlosser", team: "Team 1", nightEligible: true, active: true },    
+        { id: crypto.randomUUID(), no: "1011", first: "Max", last: "Müller1", area: "Schlosser", team: "Team 2", nightEligible: true, active: true },    
+        { id: crypto.randomUUID(), no: "2001", first: "Jens", last: "Hoffmann1", area: "Elektriker", team: "Team 1", nightEligible: true, active: true },    
+        { id: crypto.randomUUID(), no: "2011", first: "Jens", last: "Hoffmann1", area: "Elektriker", team: "Team 2", nightEligible: true, active: true },    
+        { id: crypto.randomUUID(), no: "3001", first: "Peter", last: "Bauer", area: "Gebäude", team: "", nightEligible: false, active: true }    
+      ]);    
+    }    
+    
+    if (!localStorage.getItem("manualShifts")) save("manualShifts", {});    
+    if (!localStorage.getItem("nightWeeks")) save("nightWeeks", {});    
+    if (!localStorage.getItem("readiness")) save("readiness", {});    
+    if (!localStorage.getItem("vacations")) save("vacations", []);    
+    if (!localStorage.getItem("shiftComments")) save("shiftComments", {}); // NEU: Kommentare  
+  }    
+    
+  function login() {    
+    const username = document.getElementById("loginUser").value.trim();    
+    const password = document.getElementById("loginPassword").value;    
+    
+    const user = load("users", []).find(    
+      u => u.username === username && u.password === password    
+    );    
+    
+    if (!user) {    
+      document.getElementById("loginError").textContent = "Benutzername oder Passwort ist nicht korrekt.";    
+      return;    
+    }    
+    
+    currentUser = user;    
+    
+    document.getElementById("login").classList.add("hidden");    
+    document.getElementById("app").classList.remove("hidden");    
+    
+    document.getElementById("userInfo").textContent = `${user.username} · ${roleName(user.role)}`;    
+    
+    document.querySelectorAll(".adminOnly").forEach(element => {    
+      element.classList.toggle("hidden", !isAdmin());    
+    });    
+    
+    document.querySelectorAll(".plannerOnly").forEach(element => {    
+      element.classList.toggle("hidden", !canWrite());    
+    });    
+    
+    const btnExport = document.getElementById("btnExportCSV");    
+    if (btnExport) {    
+      btnExport.classList.toggle("hidden", currentUser.role === "LESER");    
+    }    
+    
+    const today = new Date();    
+    
+    document.getElementById("monthInput").value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`;    
+    document.getElementById("nightDate").value = iso(today);    
+    document.getElementById("readyDate").value = iso(today);    
+    document.getElementById("vacationYear").value = today.getFullYear();    
+    document.getElementById("yearInput").value = today.getFullYear();    
+    
+    renderPlan();    
+    renderEmployees();    
+    renderYearEmployeeOptions();    
+  }    
+    
+  function logout() {    
+    currentUser = null;    
+    document.getElementById("app").classList.add("hidden");    
+    document.getElementById("login").classList.remove("hidden");    
+  }    
+    
+  function showPage(name, button) {    
+    document.querySelectorAll(".page").forEach(page => page.classList.add("hidden"));    
+    document.getElementById("page-" + name).classList.remove("hidden");    
+    document.querySelectorAll(".tab").forEach(tab => tab.classList.remove("active"));    
+    button.classList.add("active");    
+    
+    if (name === "plan") renderPlan();    
+    if (name === "jahr") renderYear();    
+    if (name === "nacht") renderNight();    
+    if (name === "bereit") renderReadiness();    
+    if (name === "urlaub") renderVacations();    
+    if (name === "mitarbeiter") renderEmployees();    
+    if (name === "benutzer") renderUsers();    
+  }    
+    
+  function getLateShiftTeamForWeek(date) {    
+    const startDate = parseDate(ROTATION_START);    
+    const currentMonday = mondayOf(date);    
+    const weekDifference = Math.round((currentMonday.getTime() - startDate.getTime()) / (7 * 24 * 60 * 60 * 1000));    
+    const startPattern = Math.abs(weekDifference) % 2 === 0;    
+    return startPattern ? "Team 1" : "Team 2";    
+  }    
+      
+  function getEarlyShiftTeamForWeek(date) {    
+    const lateShiftTeam = getLateShiftTeamForWeek(date);    
+    return lateShiftTeam === "Team 1" ? "Team 2" : "Team 1";    
+  }    
+    
+  function automaticTeamShift(employee, date) {    
+    if (isWeekend(date)) return "";    
+    if (employee.area === "Gebäude") return "";    
+    if (!employee.team) return "";    
+    
+    const lateShiftTeam = getLateShiftTeamForWeek(date);    
+    return employee.team === lateShiftTeam ? "S" : "F";    
+  }    
+    
+  function nightAssignmentFor(employeeId, date) {    
+    let targetMonday;    
+    const day = date.getDay();    
+    
+    if (day === 0) {    
+      targetMonday = addDays(date, 1);    
+    } else if (day >= 1 && day <= 5) {    
+      targetMonday = mondayOf(date);    
+    } else {    
+      return false;    
+    }    
+    
+    const weekKey = iso(targetMonday);    
+    const nightWeeks = load("nightWeeks", {});    
+    const assignment = nightWeeks[weekKey];    
+    
+    if (!assignment) return false;    
+    return (assignment.schlosser === employeeId || assignment.elektriker === employeeId);    
+  }    
+    
+  function hasReadiness(employeeId, date) {    
+    const readiness = load("readiness", {});    
+    return Boolean(readiness[`${employeeId}_${iso(date)}`]);    
+  }    
+    
+  function isOnVacation(employeeId, date) {    
+    const dateIso = iso(date);    
+    return load("vacations", []).some(vacation =>    
+      vacation.employeeId === employeeId && dateIso >= vacation.from && dateIso <= vacation.to    
+    );    
+  }    
+    
+  function isBlockedByVacation(employeeId, date) {    
+    const dateIso = iso(date);    
+    return load("vacations", []).some(vacation => {    
+      if (vacation.employeeId !== employeeId) return false;    
+      const dayBefore = iso(addDays(parseDate(vacation.from), -1));    
+      const dayAfter = iso(addDays(parseDate(vacation.to), 1));    
+      return dateIso >= dayBefore && dateIso <= dayAfter;    
+    });    
+  }    
+    
+  function isBlockedForNightWeek(employeeId, sundayDate) {    
+    for (let i = 0; i < 6; i++) {    
+      if (isBlockedByVacation(employeeId, addDays(sundayDate, i))) return true;    
+    }    
+    const saturdayDate = addDays(sundayDate, -1);    
+    if (hasReadiness(employeeId, saturdayDate) || hasReadiness(employeeId, sundayDate)) return true;    
+    return false;    
+  }    
+    
+  function isBlockedForReadiness(employeeId, saturdayDate) {    
+    const sundayDate = addDays(saturdayDate, 1);    
+    if (isBlockedByVacation(employeeId, saturdayDate) || isBlockedByVacation(employeeId, sundayDate)) return true;    
+    if (nightAssignmentFor(employeeId, sundayDate)) return true;    
+    return false;    
+  }    
+    
+  function countNightAssignments(employeeId) {    
+    const nightWeeks = load("nightWeeks", {});    
+    let count = 0;    
+    Object.values(nightWeeks).forEach(assignment => {    
+      if (assignment.schlosser === employeeId || assignment.elektriker === employeeId) count++;    
+    });    
+    return count;    
+  }    
+    
+  function countReadinessAssignments(employeeId) {    
+    const readiness = load("readiness", {});    
+    let count = 0;    
+    Object.entries(readiness).forEach(([key, active]) => {    
+      if (!active) return;    
+      const [storedEmployeeId, dateIso] = key.split("_");    
+      if (storedEmployeeId !== employeeId) return;    
+      const date = parseDate(dateIso);    
+      if (date.getDay() === 6) count++;    
+    });    
+    return count;    
+  }    
+    
+  function chooseMostFairEmployee(candidates, countFunction) {    
+    if (!candidates.length) return null;    
+    return [...candidates].sort((a, b) => {    
+      const countA = countFunction(a.id);    
+      const countB = countFunction(b.id);    
+      if (countA !== countB) return countA - countB;    
+      return a.last.localeCompare(b.last);    
+    })[0];    
+  }    
+    
+  function easterSunday(year) {    
+    const a = year % 19, b = Math.floor(year / 100), c = year % 100;    
+    const d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25);    
+    const g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30;    
+    const i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7;    
+    const m = Math.floor((a + 11 * h + 22 * l) / 451);    
+    const month = Math.floor((h + l - 7 * m + 114) / 31) - 1;    
+    const day = ((h + l - 7 * m + 114) % 31) + 1;    
+    return new Date(year, month, day, 12);    
+  }    
+    
+  function holidaysThuringia(year) {    
+    const easter = easterSunday(year);    
+    const fixed = [    
+      [1, 1, "Neujahr"], [5, 1, "Tag der Arbeit"], [9, 20, "Weltkindertag"],    
+      [10, 3, "Tag der Deutschen Einheit"], [10, 31, "Reformationstag"],    
+      [12, 25, "1. Weihnachtstag"], [12, 26, "2. Weihnachtstag"]    
+    ];    
+    const holidays = fixed.map(([month, day, name]) => ({    
+      date: `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`,    
+      name    
+    }));    
+    holidays.push(    
+      { date: iso(addDays(easter, -2)), name: "Karfreitag" },    
+      { date: iso(addDays(easter, 1)), name: "Ostermontag" },    
+      { date: iso(addDays(easter, 39)), name: "Christi Himmelfahrt" },    
+      { date: iso(addDays(easter, 50)), name: "Pfingstmontag" }    
+    );    
+    return holidays;    
+  }    
+    
+  function holidayName(dateIso) {    
+    const year = Number(dateIso.slice(0, 4));    
+    return holidaysThuringia(year).find(holiday => holiday.date === dateIso)?.name || "";    
+  }    
+    
+  function schoolHolidayName(dateIso) {    
+    const holidays = [    
+      { from: "2026-02-02", to: "2026-02-07", name: "Winterferien" },    
+      { from: "2026-04-07", to: "2026-04-17", name: "Osterferien" },    
+      { from: "2026-05-15", to: "2026-05-15", name: "Pfingstferien" },    
+      { from: "2026-07-04", to: "2026-08-14", name: "Sommerferien" },    
+      { from: "2026-10-12", to: "2026-10-24", name: "Herbstferien" },    
+      { from: "2026-12-23", to: "2027-01-02", name: "Weihnachtsferien" }    
+    ];    
+    return holidays.find(holiday => dateIso >= holiday.from && dateIso <= holiday.to)?.name || "";    
+  }    
+    
+  function getDisplayShift(employee, date) {    
+    const dateIso = iso(date);    
+    const manualShifts = load("manualShifts", {});    
+    const manualShift = manualShifts[`${employee.id}_${dateIso}`] || "";    
+    
+    if (isOnVacation(employee.id, date)) return "U";    
+    if (manualShift) return manualShift;    
+    if (nightAssignmentFor(employee.id, date)) return "N";    
+    
+    if (isWeekend(date)) {    
+      if (hasReadiness(employee.id, date)) return "R";    
+      return "";     
+    }    
+    return automaticTeamShift(employee, date);    
+  }    
+    
+  function renderPlan() {    
+    const monthValue = document.getElementById("monthInput").value;    
+    if (!monthValue) return;    
+    
+    const [year, month] = monthValue.split("-").map(Number);    
+    const areaFilter = document.getElementById("areaFilter").value;    
+    const daysInMonth = new Date(year, month, 0).getDate();    
+    
+    const employees = getEmployees()    
+      .filter(employee => !areaFilter || employee.area === areaFilter)    
+      .sort((a, b) => a.area.localeCompare(b.area) || a.team.localeCompare(b.team) || a.last.localeCompare(b.last));    
+    
+    const holidayText = holidaysThuringia(year)    
+      .map(holiday => `${holiday.date}: ${holiday.name}`).join(" · ");    
+    
+    document.getElementById("calendarInfo").innerHTML = `    
+      <div class="notice">    
+        <strong>Feiertage Thüringen ${year}:</strong><br>    
+        <span class="small">${holidayText}</span>    
+      </div>    
+      <div class="notice warning">    
+        <strong>Ferien Thüringen:</strong>    
+        Die hinterlegten Ferientermine werden im Kalenderkopf mit „FER“ gekennzeichnet.    
+      </div>    
+    `;    
+    
+    const manualShifts = load("manualShifts", {});    
+    const shiftComments = load("shiftComments", {}); // NEU: Kommentare laden  
+      
+    let html = "<table><thead><tr><th>Mitarbeiter / Team</th>";    
+    
+    for (let day = 1; day <= daysInMonth; day++) {    
+      const date = new Date(year, month - 1, day, 12);    
+      const dateIso = iso(date);    
+      const weekday = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"][date.getDay()];    
+      const holiday = holidayName(dateIso);    
+      const schoolHoliday = schoolHolidayName(dateIso);    
+    
+      let classes = "";    
+      if (isWeekend(date)) classes += " weekend";    
+      if (holiday) classes += " holiday";    
+    
+      html += `    
+        <th class="${classes}" title="${holiday || schoolHoliday}">    
+          ${weekday}<br>${String(day).padStart(2, "0")}    
+          ${holiday ? "<br><small>FT</small>" : ""}    
+          ${schoolHoliday ? "<br><small>FER</small>" : ""}    
+        </th>    
+      `;    
+    }    
+    
+    html += "</tr></thead><tbody>";    
+    let lastArea = "";    
+    
+    employees.forEach(employee => {    
+      if (employee.area !== lastArea) {    
+        html += `<tr><td colspan="${daysInMonth + 1}" style="background:#dbeafe;font-weight:bold">${employee.area}</td></tr>`;    
+        lastArea = employee.area;    
+      }    
+    
+      html += `    
+        <tr>    
+          <td>    
+            ${employee.last}, ${employee.first}<br>    
+            <span class="small">${employee.no}</span>    
+            ${employee.team ? `<span class="badge">${employee.team}</span>` : ""}    
+          </td>    
+      `;    
+    
+      for (let day = 1; day <= daysInMonth; day++) {    
+        const date = new Date(year, month - 1, day, 12);    
+        const dateIso = iso(date);    
+    
+        const shift = getDisplayShift(employee, date);    
+        const vacation = isOnVacation(employee.id, date);    
+        const manualShift = manualShifts[`${employee.id}_${dateIso}`] || "";    
+        const comment = shiftComments[`${employee.id}_${dateIso}`] || ""; // NEU  
+    
+        let classes = "";    
+        if (isWeekend(date)) classes += " weekend";    
+        if (holidayName(dateIso)) classes += " holiday";    
+        if (vacation && !isWeekend(date)) classes += " vacation-day";    
+  
+        // NEU: Tooltip für Feiertage und Kommentare generieren  
+        let tooltip = holidayName(dateIso) || "";  
+        if (comment) {  
+          tooltip = tooltip ? `${tooltip}\nKommentar: ${comment}` : `Kommentar: ${comment}`;  
+        }  
+        tooltip = tooltip.replace(/"/g, '&quot;'); // Verhindert kaputtes HTML bei Anführungszeichen im Kommentar  
+    
+        html += `<td class="${classes}" title="${tooltip}">`;    
+    
+        // Auswahlfeld für Planer  
+        if (canWrite() && !vacation) {    
+          html += `    
+            <select onchange="saveManualShift('${employee.id}', '${dateIso}', this.value)">    
+              <option value="">Automatisch</option>    
+              <option value="F" ${manualShift === "F" ? "selected" : ""}>F Frühschicht</option>    
+              <option value="S" ${manualShift === "S" ? "selected" : ""}>S Spätschicht</option>    
+              <option value="N" ${manualShift === "N" ? "selected" : ""}>N Nachtschicht</option>    
+              <option value="U" ${manualShift === "U" ? "selected" : ""}>U Urlaub</option>    
+              <option value="A" ${manualShift === "A" ? "selected" : ""}>A Abwesend</option>    
+              <option value="SCH" ${manualShift === "SCH" ? "selected" : ""}>Sch Schulung</option>    
+            </select>    
+          `;    
+        }   
+          
+        // Schicht anzeigen (als farbiger Block)  
+        if (shift) {    
+          const label = shift === "SCH" ? "Sch" : shift;    
+          html += `<span class="shift ${shift}">${label}</span>`;    
+        }  
+  
+        // NEU: Kommentar-Button anzeigen  
+        if (canWrite()) {  
+          html += `<span class="comment-btn ${comment ? 'has-comment' : ''}" onclick="editComment('${employee.id}', '${dateIso}')">💬</span>`;  
+        } else if (comment) {  
+          // Leser sehen das Icon nur, wenn ein Kommentar existiert, können aber nicht klicken  
+          html += `<span class="comment-btn has-comment">💬</span>`;  
+        }  
+    
+        html += "</td>";    
+      }    
+      html += "</tr>";    
+    });    
+    
+    html += "</tbody></table>";    
+    document.getElementById("plan").innerHTML = html;    
+  }    
+  
+  // NEU: Funktion zum Bearbeiten von Kommentaren  
+  function editComment(employeeId, dateIso) {  
+    if (!canWrite()) return;  
+  
+    const comments = load("shiftComments", {});  
+    const key = `${employeeId}_${dateIso}`;  
+    const currentComment = comments[key] || "";  
+  
+    const newComment = prompt(`Kommentar für ${dateIso} eingeben (leer lassen zum Löschen):`, currentComment);  
+  
+    if (newComment === null) return; // Abgebrochen  
+  
+    if (newComment.trim() === "") {  
+      delete comments[key];  
+    } else {  
+      comments[key] = newComment.trim();  
+    }  
+  
+    save("shiftComments", comments);  
+    renderPlan();  
+  }  
+    
+  function saveManualShift(employeeId, dateIso, value) {    
+    if (!canWrite()) return;    
+    const date = parseDate(dateIso);    
+    const employee = getEmployees().find(e => e.id === employeeId);    
+    if (!employee) return;    
+    
+    if (isWeekend(date) && value !== "N" && value !== "") {    
+      alert("Am Wochenende sind nur Nachtschicht oder Bereitschaft erlaubt. Bereitschaft wird über die Bereitschaftsplanung eingetragen.");    
+      renderPlan();    
+      return;    
+    }    
+    
+    if (value === "N") {    
+      if (employee.area === "Gebäude") {    
+        alert("Mitarbeiter aus Gebäude dürfen keine Nachtschicht erhalten.");    
+        renderPlan();    
+        return;    
+      }    
+      if (employee.nightEligible === false) {    
+        alert("Dieser Mitarbeiter ist nicht für Nachtschicht freigegeben.");    
+        renderPlan();    
+        return;    
+      }    
+      if (isBlockedByVacation(employeeId, date)) {    
+        alert("Vor, während oder nach Urlaub darf keine Nachtschicht geplant werden.");    
+        renderPlan();    
+        return;    
+      }    
+      const lateShiftTeam = getLateShiftTeamForWeek(date);    
+      if (employee.team !== lateShiftTeam) {    
+        alert(`Nachtschicht darf nur an Mitarbeiter aus dem aktuellen Spätschicht-Team (${lateShiftTeam}) vergeben werden.`);    
+        renderPlan();    
+        return;    
+      }    
+    }    
+    
+    if (isOnVacation(employeeId, date) && value !== "") {    
+      alert("Dieser Mitarbeiter hat Jahresurlaub. Änderungen bitte über die Urlaubsverwaltung vornehmen.");    
+      renderPlan();    
+      return;    
+    }    
+    
+    const manualShifts = load("manualShifts", {});    
+    const key = `${employeeId}_${dateIso}`;    
+    
+    if (value) {    
+      manualShifts[key] = value;    
+    } else {    
+      delete manualShifts[key];    
+    }    
+    
+    save("manualShifts", manualShifts);    
+    renderPlan();    
+    if (document.getElementById("page-jahr").classList.contains("hidden") === false) renderYear();    
+  }    
+    
+  function renderYearEmployeeOptions() {    
+    const select = document.getElementById("yearEmployee");    
+    if (!select) return;    
+    const employees = getEmployees().sort((a, b) => a.last.localeCompare(b.last));    
+    select.innerHTML = `<option value="">Bitte Mitarbeiter auswählen</option>` +     
+      employees.map(e => `<option value="${e.id}">${e.last}, ${e.first} – ${e.area}</option>`).join("");    
+  }    
+    
+  function renderYear() {    
+    const year = Number(document.getElementById("yearInput").value);    
+    const empId = document.getElementById("yearEmployee").value;    
+    const content = document.getElementById("yearContent");    
+    
+    if (!year || !empId) {    
+      content.innerHTML = `<div class="notice">Bitte wählen Sie ein Jahr und einen Mitarbeiter aus, um die Ansicht zu laden.</div>`;    
+      return;    
+    }    
+    
+    const employee = getEmployees().find(e => e.id === empId);    
+    if (!employee) return;    
+    
+    let countU = 0, countN = 0, countR = 0, countA = 0;    
+    const monthNames = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];    
+    let html = `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;">`;    
+    
+    for (let m = 0; m < 12; m++) {    
+      html += `<div class="card"><h4 style="margin: 0 0 10px 0; text-align: center; color: #1e293b;">${monthNames[m]}</h4>    
+               <table class="mini-calendar">    
+               <thead><tr><th>Mo</th><th>Di</th><th>Mi</th><th>Do</th><th>Fr</th><th>Sa</th><th>So</th></tr></thead>    
+               <tbody><tr>`;    
+    
+      const daysInMonth = new Date(year, m + 1, 0).getDate();    
+      const firstDay = new Date(year, m, 1).getDay();    
+      const emptyDays = firstDay === 0 ? 6 : firstDay - 1;    
+    
+      for (let i = 0; i < emptyDays; i++) html += `<td class="empty"></td>`;    
+    
+      for (let d = 1; d <= daysInMonth; d++) {    
+        if ((emptyDays + d - 1) % 7 === 0 && d !== 1) html += `</tr><tr>`;    
+    
+        const date = new Date(year, m, d, 12);    
+        const dateIso = iso(date);    
+        const shift = getDisplayShift(employee, date);    
+        const isWknd = isWeekend(date);    
+        const hol = holidayName(dateIso);    
+    
+        if (shift === "U") countU++;    
+        if (shift === "N") countN++;    
+        if (shift === "R") countR++;    
+        if (shift === "A") countA++;    
+    
+        let tdClass = "";    
+        if (isWknd) tdClass = "weekend";    
+        if (hol) tdClass = "holiday";    
+    
+        html += `<td class="${tdClass}" title="${hol || ''}">    
+                   <div class="day-number">${d}</div>    
+                   ${shift ? `<div class="shift ${shift}" style="font-size:10px; padding:1px; margin:0;">${shift === 'SCH' ? 'Sch' : shift}</div>` : ''}    
+                 </td>`;    
+      }    
+    
+      const totalCells = emptyDays + daysInMonth;    
+      const remaining = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);    
+      for (let i = 0; i < remaining; i++) html += `<td class="empty"></td>`;    
+    
+      html += `</tr></tbody></table></div>`;    
+    }    
+    html += `</div>`;    
+    
+    const statsHtml = `    
+      <div class="card" style="display: flex; gap: 15px; flex-wrap: wrap; background: #f8fafc;">    
+        <div style="font-size: 14px;"><strong>Mitarbeiter:</strong> ${employee.last}, ${employee.first} (${employee.team || employee.area})</div>    
+        <div style="margin-left: auto;">    
+          <span class="badge U" style="color:white; margin-right:4px;">U</span> <strong>${countU}</strong> Urlaubstage    
+        </div>    
+        <div>    
+          <span class="badge N" style="color:white; margin-right:4px;">N</span> <strong>${countN}</strong> Nachtschichten    
+        </div>    
+        <div>    
+          <span class="badge R" style="color:white; margin-right:4px;">R</span> <strong>${countR}</strong> Bereitschaften    
+        </div>    
+        <div>    
+          <span class="badge A" style="color:white; margin-right:4px;">A</span> <strong>${countA}</strong> Fehltage (Abwesend)    
+        </div>    
+      </div>    
+    `;    
+    content.innerHTML = statsHtml + html;    
+  }    
+    
+  function renderNight() {    
+    const date = parseDate(document.getElementById("nightDate").value || iso(new Date()));    
+    const monday = mondayOf(date);    
+    const sunday = sundayOf(date);    
+    const weekKey = iso(monday);    
+    
+    const nightWeeks = load("nightWeeks", {});    
+    const assignment = nightWeeks[weekKey] || { schlosser: "", elektriker: "" };    
+    
+    const employees = getEmployees();    
+    const lateShiftTeam = getLateShiftTeamForWeek(monday);    
+    
+    const schlosser = employees.filter(employee =>    
+      employee.area === "Schlosser" && employee.team === lateShiftTeam &&    
+      employee.nightEligible !== false && !isBlockedForNightWeek(employee.id, sunday)    
+    );    
+    
+    const elektriker = employees.filter(employee =>    
+      employee.area === "Elektriker" && employee.team === lateShiftTeam &&    
+      employee.nightEligible !== false && !isBlockedForNightWeek(employee.id, sunday)    
+    );    
+    
+    document.getElementById("nightContent").innerHTML = `    
+      <div class="card">    
+        <h3>Nachtwoche ab Sonntag ${iso(sunday)} um 22:00 Uhr</h3>    
+        <p class="small">    
+          Nachtwoche: Sonntag 22:00 Uhr bis Samstag 06:00 Uhr.<br>    
+          Die Nachtschicht wird aus dem Team besetzt, das in dieser Woche Spätschicht hat <strong>(${lateShiftTeam})</strong>.<br>    
+          Bei der automatischen Auswahl werden Urlaub (inkl. Tag davor/danach) sowie Bereitschaft am vorherigen Wochenende berücksichtigt.    
+        </p>    
+        <div class="form-grid">    
+          <label>Nachtschicht Schlosser    
+            <select id="nightSchlosser" ${canWrite() ? "" : "disabled"}>    
+              <option value="">Bitte auswählen</option>    
+              ${schlosser.map(employee => `    
+                <option value="${employee.id}" ${assignment.schlosser === employee.id ? "selected" : ""}>    
+                  ${employee.last}, ${employee.first} – ${employee.team} (${countNightAssignments(employee.id)} Nachtwochen)    
+                </option>    
+              `).join("")}    
+            </select>    
+          </label>    
+          <label>Nachtschicht Elektriker    
+            <select id="nightElektriker" ${canWrite() ? "" : "disabled"}>    
+              <option value="">Bitte auswählen</option>    
+              ${elektriker.map(employee => `    
+                <option value="${employee.id}" ${assignment.elektriker === employee.id ? "selected" : ""}>    
+                  ${employee.last}, ${employee.first} – ${employee.team} (${countNightAssignments(employee.id)} Nachtwochen)    
+                </option>    
+              `).join("")}    
+            </select>    
+          </label>    
+          ${canWrite() ? `    
+            <button class="secondary" onclick="autoPlanNightWeek('${weekKey}')">Automatisch verteilen</button>    
+            <button class="primary" onclick="saveNightWeek('${weekKey}')">Nachtwoche speichern</button>    
+          ` : ""}    
+        </div>    
+      </div>    
+    `;    
+  }    
+    
+  function autoPlanNightWeek(weekKey) {    
+    if (!canWrite()) return;    
+    const monday = parseDate(weekKey);    
+    const sunday = addDays(monday, -1);    
+    const lateShiftTeam = getLateShiftTeamForWeek(monday);    
+    const employees = getEmployees();    
+    
+    const schlosserCandidates = employees.filter(employee =>    
+      employee.area === "Schlosser" && employee.team === lateShiftTeam &&    
+      employee.nightEligible !== false && !isBlockedForNightWeek(employee.id, sunday)    
+    );    
+    const elektrikerCandidates = employees.filter(employee =>    
+      employee.area === "Elektriker" && employee.team === lateShiftTeam &&    
+      employee.nightEligible !== false && !isBlockedForNightWeek(employee.id, sunday)    
+    );    
+    
+    const schlosser = chooseMostFairEmployee(schlosserCandidates, countNightAssignments);    
+    const elektriker = chooseMostFairEmployee(elektrikerCandidates, countNightAssignments);    
+    
+    if (!schlosser) { alert(`Kein geeigneter Schlosser aus ${lateShiftTeam} für die Nachtwoche verfügbar.`); return; }    
+    if (!elektriker) { alert(`Kein geeigneter Elektriker aus ${lateShiftTeam} für die Nachtwoche verfügbar.`); return; }    
+    
+    document.getElementById("nightSchlosser").value = schlosser.id;    
+    document.getElementById("nightElektriker").value = elektriker.id;    
+    saveNightWeek(weekKey);    
+  }    
+    
+  function saveNightWeek(weekKey) {    
+    if (!canWrite()) return;    
+    const schlosserId = document.getElementById("nightSchlosser").value;    
+    const elektrikerId = document.getElementById("nightElektriker").value;    
+    
+    if (!schlosserId || !elektrikerId) { alert("Bitte einen Schlosser und einen Elektriker auswählen."); return; }    
+    
+    const monday = parseDate(weekKey);    
+    const sunday = addDays(monday, -1);    
+    const lateShiftTeam = getLateShiftTeamForWeek(monday);    
+    const schlosserEmp = getEmployees().find(e => e.id === schlosserId);    
+    const elektrikerEmp = getEmployees().find(e => e.id === elektrikerId);    
+    
+    if (schlosserEmp.team !== lateShiftTeam || elektrikerEmp.team !== lateShiftTeam) {    
+      alert(`Die ausgewählten Mitarbeiter müssen im aktuellen Spätschicht-Team (${lateShiftTeam}) sein.`); return;    
+    }    
+    if (isBlockedForNightWeek(schlosserId, sunday) || isBlockedForNightWeek(elektrikerId, sunday)) {    
+      alert("Ein ausgewählter Mitarbeiter ist vor/während/nach Urlaub oder durch Bereitschaft am Wochenende gesperrt."); return;    
+    }    
+    
+    const nightWeeks = load("nightWeeks", {});    
+    nightWeeks[weekKey] = { schlosser: schlosserId, elektriker: elektrikerId };    
+    save("nightWeeks", nightWeeks);    
+    alert("Nachtwoche wurde gespeichert.");    
+    renderNight();    
+    renderPlan();    
+  }    
+    
+  function renderReadiness() {    
+    const date = parseDate(document.getElementById("readyDate").value || iso(new Date()));    
+    let saturday = new Date(date);    
+    while (saturday.getDay() !== 6) saturday.setDate(saturday.getDate() - 1);    
+    
+    const sunday = addDays(saturday, 1);    
+    const saturdayIso = iso(saturday);    
+    const sundayIso = iso(sunday);    
+    const readiness = load("readiness", {});    
+    const employees = getEmployees();    
+    const earlyShiftTeam = getEarlyShiftTeamForWeek(saturday);    
+    
+    let html = `<div class="notice"><strong>Wochenende:</strong> Samstag ${saturdayIso} und Sonntag ${sundayIso}</div>`;    
+    
+    ["Schlosser", "Elektriker"].forEach(area => {    
+      const possibleEmployees = employees.filter(employee =>    
+        employee.area === area && employee.team === earlyShiftTeam && !isBlockedForReadiness(employee.id, saturday)    
+      );    
+      const selected = possibleEmployees.find(employee =>    
+        readiness[`${employee.id}_${saturdayIso}`] || readiness[`${employee.id}_${sundayIso}`]    
+      );    
+    
+      html += `    
+        <div class="card">    
+          <h3>${area}</h3>    
+          <p class="small">Die Bereitschaft wird aus dem Team besetzt, das in dieser Woche Frühschicht hat <strong>(${earlyShiftTeam})</strong>.<br>    
+          Mitarbeiter mit Urlaub (inkl. Wochenende davor/danach) oder mit anschließender Nachtwoche werden nicht berücksichtigt.</p>    
+          <label>Bereitschaft    
+            <select id="ready_${area}" ${canWrite() ? "" : "disabled"}>    
+              <option value="">Keine Bereitschaft</option>    
+              ${possibleEmployees.map(employee => `    
+                <option value="${employee.id}" ${selected?.id === employee.id ? "selected" : ""}>    
+                  ${employee.last}, ${employee.first} – ${employee.team} (${countReadinessAssignments(employee.id)} Bereitschaften)    
+                </option>    
+              `).join("")}    
+            </select>    
+          </label>    
+          ${canWrite() ? `    
+            <button class="secondary" onclick="autoPlanReadiness('${area}', '${saturdayIso}', '${sundayIso}')">Automatisch verteilen</button>    
+            <button class="primary" onclick="saveReadiness('${area}', '${saturdayIso}', '${sundayIso}')">Bereitschaft speichern</button>    
+          ` : ""}    
+        </div>    
+      `;    
+    });    
+    document.getElementById("readyContent").innerHTML = html;    
+  }    
+    
+  function autoPlanReadiness(area, saturdayIso, sundayIso) {    
+    if (!canWrite()) return;    
+    const saturday = parseDate(saturdayIso);    
+    const earlyShiftTeam = getEarlyShiftTeamForWeek(saturday);    
+    const candidates = getEmployees().filter(employee =>    
+      employee.area === area && employee.team === earlyShiftTeam && !isBlockedForReadiness(employee.id, saturday)    
+    );    
+    const selected = chooseMostFairEmployee(candidates, countReadinessAssignments);    
+    
+    if (!selected) { alert(`Keine geeignete Person aus ${earlyShiftTeam} für die Bereitschaft im Bereich ${area} verfügbar.`); return; }    
+    document.getElementById(`ready_${area}`).value = selected.id;    
+    saveReadiness(area, saturdayIso, sundayIso);    
+  }    
+    
+  function saveReadiness(area, saturdayIso, sundayIso) {    
+    if (!canWrite()) return;    
+    const employeeId = document.getElementById(`ready_${area}`).value;    
+    const readiness = load("readiness", {});    
+    const employees = getEmployees().filter(employee => employee.area === area);    
+    
+    employees.forEach(employee => {    
+      delete readiness[`${employee.id}_${saturdayIso}`];    
+      delete readiness[`${employee.id}_${sundayIso}`];    
+    });    
+    
+    if (employeeId) {    
+      const saturday = parseDate(saturdayIso);    
+      const earlyShiftTeam = getEarlyShiftTeamForWeek(saturday);    
+      const emp = getEmployees().find(e => e.id === employeeId);    
+    
+      if (emp.team !== earlyShiftTeam) { alert(`Die Bereitschaft darf nur an Mitarbeiter aus dem aktuellen Frühschicht-Team (${earlyShiftTeam}) vergeben werden.`); return; }    
+      if (isBlockedForReadiness(employeeId, saturday)) { alert("Vor, während oder nach Urlaub sowie vor einer Nachtwoche darf keine Bereitschaft geplant werden."); return; }    
+      readiness[`${employeeId}_${saturdayIso}`] = true;    
+      readiness[`${employeeId}_${sundayIso}`] = true;    
+    }    
+    save("readiness", readiness);    
+    renderReadiness();    
+    renderPlan();    
+  }    
+    
+  function renderVacationEmployeeOptions() {    
+    const select = document.getElementById("vacEmployee");    
+    if (!select) return;    
+    const employees = getEmployees().sort((a, b) => a.last.localeCompare(b.last));    
+    select.innerHTML = `<option value="">Bitte Mitarbeiter auswählen</option>` + employees.map(employee => `    
+      <option value="${employee.id}">${employee.last}, ${employee.first} – ${employee.area} ${employee.team ? `– ${employee.team}` : ""}</option>    
+    `).join("");    
+  }    
+    
+  function addVacation() {    
+    if (!canWrite()) return;    
+    const employeeId = document.getElementById("vacEmployee").value;    
+    const from = document.getElementById("vacFrom").value;    
+    const to = document.getElementById("vacTo").value;    
+    const note = document.getElementById("vacNote").value.trim();    
+    
+    if (!employeeId || !from || !to) { alert("Bitte Mitarbeiter, Von-Datum und Bis-Datum eingeben."); return; }    
+    if (to < from) { alert("Das Bis-Datum darf nicht vor dem Von-Datum liegen."); return; }    
+    
+    const vacations = load("vacations", []);    
+    vacations.push({ id: crypto.randomUUID(), employeeId, from, to, note });    
+    save("vacations", vacations);    
+    
+    document.getElementById("vacEmployee").value = "";    
+    document.getElementById("vacFrom").value = "";    
+    document.getElementById("vacTo").value = "";    
+    document.getElementById("vacNote").value = "";    
+    
+    renderVacations();    
+    renderPlan();    
+  }    
+    
+  function deleteVacation(id) {    
+    if (!canWrite()) return;    
+    if (!confirm("Urlaubseintrag wirklich löschen?")) return;    
+    const vacations = load("vacations", []).filter(vacation => vacation.id !== id);    
+    save("vacations", vacations);    
+    renderVacations();    
+    renderPlan();    
+  }    
+    
+  function renderVacations() {    
+    renderVacationEmployeeOptions();    
+    document.getElementById("vacationForm").classList.toggle("hidden", !canWrite());    
+    const year = Number(document.getElementById("vacationYear").value || new Date().getFullYear());    
+    const employees = getEmployees();    
+    
+    const vacations = load("vacations", [])    
+      .filter(vacation => vacation.from.startsWith(String(year)) || vacation.to.startsWith(String(year)))    
+      .sort((a, b) => a.from.localeCompare(b.from));    
+    
+    if (!vacations.length) {    
+      document.getElementById("vacationList").innerHTML = `<div class="notice">Für das Jahr ${year} sind keine Urlaubszeiträume eingetragen.</div>`;    
+      return;    
+    }    
+    
+    document.getElementById("vacationList").innerHTML = `    
+      <div class="card">    
+        <h3>Urlaubsübersicht ${year}</h3>    
+        <table style="min-width:750px">    
+          <thead>    
+            <tr><th>Mitarbeiter</th><th>Bereich</th><th>Team</th><th>Von</th><th>Bis</th><th>Bemerkung</th>${canWrite() ? "<th>Aktion</th>" : ""}</tr>    
+          </thead>    
+          <tbody>    
+            ${vacations.map(vacation => {    
+              const employee = employees.find(e => e.id === vacation.employeeId);    
+              return `    
+                <tr>    
+                  <td>${employee ? `${employee.last}, ${employee.first}` : "Unbekannter Mitarbeiter"}</td>    
+                  <td>${employee?.area || "–"}</td>    
+                  <td>${employee?.team || "–"}</td>    
+                  <td>${vacation.from}</td>    
+                  <td>${vacation.to}</td>    
+                  <td>${vacation.note || "–"}</td>    
+                  ${canWrite() ? `<td><button class="danger" onclick="deleteVacation('${vacation.id}')">Löschen</button></td>` : ""}    
+                </tr>    
+              `;    
+            }).join("")}    
+          </tbody>    
+        </table>    
+      </div>    
+    `;    
+  }    
+    
+  function toggleTeamSelection() {    
+    const area = document.getElementById("empArea").value;    
+    const isBuilding = area === "Gebäude";    
+    document.getElementById("teamLabel").classList.toggle("hidden", isBuilding);    
+    document.getElementById("nightEligibleLabel").classList.toggle("hidden", isBuilding);    
+  }    
+    
+  function addEmployee() {    
+    if (!canWrite()) return;    
+    const no = document.getElementById("empNo").value.trim();    
+    const first = document.getElementById("empFirst").value.trim();    
+    const last = document.getElementById("empLast").value.trim();    
+    const area = document.getElementById("empArea").value;    
+    const team = area === "Gebäude" ? "" : document.getElementById("empTeam").value;    
+    const nightEligible = area !== "Gebäude" && document.getElementById("empNightEligible").value === "true";    
+    
+    if (!no || !first || !last) { alert("Bitte Personalnummer, Vorname und Nachname eingeben."); return; }    
+    
+    const employees = load("employees", []);    
+    if (employees.some(employee => employee.no === no)) { alert("Diese Personalnummer existiert bereits."); return; }    
+    
+    employees.push({ id: crypto.randomUUID(), no, first, last, area, team, nightEligible, active: true });    
+    save("employees", employees);    
+    
+    document.getElementById("empNo").value = "";    
+    document.getElementById("empFirst").value = "";    
+    document.getElementById("empLast").value = "";    
+    
+    renderEmployees();    
+    renderVacationEmployeeOptions();    
+    renderPlan();    
+    renderYearEmployeeOptions();    
+  }    
+    
+  function deactivateEmployee(id) {    
+    if (!canWrite()) return;    
+    const employees = load("employees", []);    
+    const employee = employees.find(e => e.id === id);    
+    if (!employee) return;    
+    if (!confirm(`${employee.first} ${employee.last} deaktivieren?`)) return;    
+    
+    employee.active = false;    
+    save("employees", employees);    
+    renderEmployees();    
+    renderPlan();    
+    renderYearEmployeeOptions();    
+  }    
+    
+  function renderEmployees() {    
+    document.getElementById("employeeForm").classList.toggle("hidden", !canWrite());    
+    const employees = load("employees", []).sort((a, b) => a.area.localeCompare(b.area) || a.team.localeCompare(b.team) || a.last.localeCompare(b.last));    
+    
+    document.getElementById("employeeList").innerHTML = `    
+      <div class="card">    
+        <h3>Mitarbeiterliste</h3>    
+        ${employees.map(employee => `    
+          <div class="row">    
+            <div>    
+              <strong>${employee.last}, ${employee.first}</strong>    
+              <span class="badge">${employee.area}</span>    
+              ${employee.team ? `<span class="badge">${employee.team}</span>` : ""}    
+              ${employee.area !== "Gebäude" ? `<span class="badge" style="background:${employee.nightEligible !== false ? "#ede9fe" : "#fee2e2"}; color:${employee.nightEligible !== false ? "#5b21b6" : "#991b1b"};">${employee.nightEligible !== false ? "Nachtschicht möglich" : "Keine Nachtschicht"}</span>` : ""}    
+              <br>    
+              <span class="small">Personalnummer: ${employee.no} · ${employee.active ? "Aktiv" : "Inaktiv"}</span>    
+            </div>    
+            ${canWrite() && employee.active ? `<button class="danger" onclick="deactivateEmployee('${employee.id}')">Deaktivieren</button>` : ""}    
+          </div>    
+        `).join("")}    
+      </div>    
+    `;    
+  }    
+    
+  function addUser() {    
+    if (!isAdmin()) return;    
+    const username = document.getElementById("newUsername").value.trim();    
+    const password = document.getElementById("newPassword").value;    
+    const role = document.getElementById("newRole").value;    
+    
+    if (!username || !password) { alert("Benutzername und Passwort sind erforderlich."); return; }    
+    
+    const users = load("users", []);    
+    if (users.some(user => user.username === username)) { alert("Dieser Benutzername existiert bereits."); return; }    
+    
+    users.push({ id: crypto.randomUUID(), username, password, role });    
+    save("users", users);    
+    
+    document.getElementById("newUsername").value = "";    
+    document.getElementById("newPassword").value = "";    
+    renderUsers();    
+  }    
+    
+  function renderUsers() {    
+    if (!isAdmin()) return;    
+    const users = load("users", []);    
+    document.getElementById("userList").innerHTML = `    
+      <div class="card">    
+        <h3>Vorhandene Benutzer</h3>    
+        ${users.map(user => `    
+          <div class="row">    
+            <div><strong>${user.username}</strong><span class="badge">${roleName(user.role)}</span></div>    
+          </div>    
+        `).join("")}    
+      </div>    
+    `;    
+  }    
+    
+  function exportCSV() {    
+    const monthValue = document.getElementById("monthInput").value;    
+    if (!monthValue) return;    
+    
+    const [year, month] = monthValue.split("-").map(Number);    
+    const daysInMonth = new Date(year, month, 0).getDate();    
+    const employees = getEmployees();    
+    const shiftComments = load("shiftComments", {}); // NEU: Kommentare für CSV laden  
+    
+    const rows = [    
+      ["Personalnummer", "Nachname", "Vorname", "Bereich", "Team", "Datum", "Planung", "Feiertag Thüringen", "Ferien Thüringen", "Kommentar"]  // NEU: Spalte hinzugefügt  
+    ];    
+    
+    employees.forEach(employee => {    
+      for (let day = 1; day <= daysInMonth; day++) {    
+        const date = new Date(year, month - 1, day, 12);    
+        const dateIso = iso(date);    
+        const shift = getDisplayShift(employee, date);    
+        const comment = shiftComments[`${employee.id}_${dateIso}`] || ""; // NEU: Kommentar abrufen  
+    
+        rows.push([    
+          employee.no,    
+          employee.last,    
+          employee.first,    
+          employee.area,    
+          employee.team,    
+          dateIso,    
+          shift,    
+          holidayName(dateIso),    
+          schoolHolidayName(dateIso),  
+          comment // NEU: In CSV schreiben  
+        ]);    
+      }    
+    });    
+    
+    const csv = rows.map(row => row.map(value => `"${String(value).replaceAll('"', '""')}"`).join(";")).join("\n");    
+    const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });    
+    const url = URL.createObjectURL(blob);    
+    const link = document.createElement("a");    
+    
+    link.href = url;    
+    link.download = `Schichtplan_${monthValue}.csv`;    
+    link.click();    
+    URL.revokeObjectURL(url);    
+  }    
+    
+  initData();    
+  toggleTeamSelection();    
+</script>    
+    
+</body>    
+</html>  
 
